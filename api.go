@@ -1,6 +1,8 @@
 package open_alipay
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type api interface {
 	method() string
