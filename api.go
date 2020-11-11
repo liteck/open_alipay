@@ -16,24 +16,6 @@ func String(v interface{}) string {
 	return string(x)
 }
 
-//
-//type responseInterface interface{}
-//
-//type Response struct {
-//	Code    string `json:"code,omitempty"`
-//	Msg     string `json:"msg,omitempty"`
-//	SubCode string `json:"sub_code,omitempty"`
-//	SubMsg  string `json:"sub_msg,omitempty"`
-//}
-//
-//func (o *OpenApi) SetBizContent(biz bizInterface) error {
-//	if v, err := o.biz_to_string(biz); err != nil {
-//		return err
-//	} else {
-//		o.params.BizContent = v
-//		return nil
-//	}
-//}
 
 //func (a *AlipayApi) biz_to_string(b bizInterface) (string, error) {
 //	if err := b.valid(); err != nil {

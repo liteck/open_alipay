@@ -50,21 +50,24 @@ func (a *AlipayClient) Execute(_api api, token string) (err error) {
 	cMap := a.jsonToMap(params)
 
 	//业务参数
-	if b, o, e := _api.params(); e != nil {
-		err = e
+	var bizContent, otherParams interface{}
+	if bizContent, otherParams, err = _api.params(); err != nil {
 		log.Println(err.Error())
 		return
 	} else {
 		// biz类参数可不是这样的
-		if b != nil {
-			//bMap := a.toMap(b)
-			//for k, v := range bMap {
-			//	cMap[k] = v
-			//}
+		if bizContent != nil {
+			var bizData []byte
+			if bizData, err = json.Marshal(&bizContent); err != nil {
+				log.Println(err.Error())
+				return
+			}
+
+			cMap["biz_content"] = string(bizData)
 		}
 		// 其它表单类参数是拼接
-		if o != nil {
-			oMap := a.jsonToMap(o)
+		if otherParams != nil {
+			oMap := a.jsonToMap(otherParams)
 			for k, v := range oMap {
 				cMap[k] = v
 			}

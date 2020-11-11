@@ -34,7 +34,7 @@ func (a AlipayOpenSpBlueSeaActivityQuery) response() interface{} {
 
 type ReqAlipayOpenSpBlueSeaActivityQuery struct {
 	//申请单Id
-	OrderId string `json:"order_id" validate:"required"`
+	OrderId string `json:"order_id,omitempty" validate:"required"`
 }
 
 type RespAlipayOpenSpBlueSeaActivityQuery struct {

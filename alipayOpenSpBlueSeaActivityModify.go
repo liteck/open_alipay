@@ -34,59 +34,59 @@ func (a AlipayOpenSpBlueSeaActivityModify) response() interface{} {
 
 type ReqAlipayOpenSpBlueSeaActivityModify struct {
 	//申请单Id
-	OrderId string `json:"order_id" validate:"required"`
+	OrderId string `json:"order_id,omitempty" validate:"required"`
 	/**
 	营业执照，要求证件文本信息清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	BusinessLic string `json:"business_lic" validate:"omitempty"`
+	BusinessLic string `json:"business_lic,omitempty" validate:"omitempty"`
 	/**
 	餐饮服务许可证，要求证件文本信息清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	FoodServiceLic string `json:"food_service_lic" validate:"omitempty"`
+	FoodServiceLic string `json:"food_service_lic,omitempty" validate:"omitempty"`
 	/**
 	食品卫生许可证，要求证件文本信息清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	FoodHealthLic string `json:"food_health_lic" validate:"omitempty"`
+	FoodHealthLic string `json:"food_health_lic,omitempty" validate:"omitempty"`
 	/**
 	食品经营许可证，要求证件文本信息清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	FoodBusinessLic string `json:"food_business_lic" validate:"omitempty"`
+	FoodBusinessLic string `json:"food_business_lic,omitempty" validate:"omitempty"`
 	/**
 	食品流通许可证，要求证件文本信息清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	FoodCirculateLic string `json:"food_circulate_lic" validate:"omitempty"`
+	FoodCirculateLic string `json:"food_circulate_lic,omitempty" validate:"omitempty"`
 	/**
 	食品生产许可证，要求证件文本信息清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	FoodProductionLic string `json:"food_production_lic" validate:"omitempty"`
+	FoodProductionLic string `json:"food_production_lic,omitempty" validate:"omitempty"`
 	/**
 	烟草专卖零售许可证，要求证件文本信息清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	TobaccoLic string `json:"tobacco_lic" validate:"omitempty"`
+	TobaccoLic string `json:"tobacco_lic,omitempty" validate:"omitempty"`
 	/**
 	门头照，要求店铺外观照片清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	ShopEntrancePic string `json:"shop_entrance_pic" validate:"omitempty"`
+	ShopEntrancePic string `json:"shop_entrance_pic,omitempty" validate:"omitempty"`
 	/**
 	店内照，要求店内照片清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
-	IndoorPic string `json:"indoor_pic" validate:"omitempty"`
+	IndoorPic string `json:"indoor_pic,omitempty" validate:"omitempty"`
 	/**
 	省份编码
 	*/
-	ProvinceCode string `json:"province_code" validate:"omitempty"`
+	ProvinceCode string `json:"province_code,omitempty" validate:"omitempty"`
 	/**
 	城市编码
 	*/
-	CityCode string `json:"city_code" validate:"omitempty"`
+	CityCode string `json:"city_code,omitempty" validate:"omitempty"`
 	/**
 	区县编码
 	*/
-	DistrictCode string `json:"district_code" validate:"omitempty"`
+	DistrictCode string `json:"district_code,omitempty" validate:"omitempty"`
 	/**
 	详细地址 万塘路18号黄龙时代广场B座
 	*/
-	Address string `json:"address" validate:"omitempty"`
+	Address string `json:"address,omitempty" validate:"omitempty"`
 }
 
 type RespAlipayOpenSpBlueSeaActivityModify struct {

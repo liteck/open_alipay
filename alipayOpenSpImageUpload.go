@@ -36,7 +36,7 @@ type ReqAlipayOpenSpImageUpload struct {
 	图片二进制字节流，最大为10M
 	二进制字节流
 	*/
-	ImageContent []byte `json:"image_content;omitempty"`
+	ImageContent []byte `json:"image_content,omitempty"`
 }
 
 type RespAlipayOpenSpImageUpload struct {
