@@ -4,12 +4,14 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,6 +20,21 @@ import (
 	"strings"
 	"time"
 )
+
+/**
+接口类.
+实现时需要满足下面条件
+*/
+type api interface {
+	// 支付宝的Method值
+	getMethod() (method string)
+	// 请求参数.指定请求参数属于哪里的
+	getReq() (biz interface{}, form interface{})
+}
+
+type baseApi struct {
+	Input interface{} // 请求参数
+}
 
 /**
 支付宝
@@ -29,7 +46,7 @@ type AlipayClient struct {
 	PrivateRSA []byte `validate:"required"` //支付宝私钥.接口签名使用.(注:非 java 的 pcsk8.)
 }
 
-func (a *AlipayClient) Execute(_api api, token string) (err error) {
+func (a *AlipayClient) Execute(_api api, token string, ptrResp interface{}) (err error) {
 	// check
 	if err = valid(a); err != nil {
 		log.Println(err.Error())
@@ -37,33 +54,28 @@ func (a *AlipayClient) Execute(_api api, token string) (err error) {
 	}
 
 	//公共参数
-	params := a.initParams(_api.method(), token)
+	params := a.initParams(_api.getMethod(), token)
 
 	//业务参数
-	var bizContent, otherParams interface{}
-	if bizContent, otherParams, err = _api.params(); err != nil {
-		log.Println(err.Error())
-		return
-	} else {
-		// biz类参数可不是这样的
-		if bizContent != nil {
-			var bizData []byte
-			if bizData, err = json.Marshal(&bizContent); err != nil {
-				log.Println(err.Error())
-				return
-			}
-			params.Set("biz_content", string(bizData))
+	bizContent, formParams := _api.getReq()
+	// biz类参数可不是这样的
+	if bizContent != nil {
+		var bizData []byte
+		if bizData, err = json.Marshal(&bizContent); err != nil {
+			log.Println(err.Error())
+			return
 		}
-		// 其它表单类参数是拼接
-		if otherParams != nil {
-			oMap := jsonToMap(otherParams)
-			for k, v := range oMap {
-				params.Set(k, fmt.Sprintf("%v", v))
-			}
+		params.Set("biz_content", string(bizData))
+	}
+
+	// 其它表单类参数是拼接
+	if formParams != nil {
+		oMap := jsonToMap(formParams)
+		for k, v := range oMap {
+			params.Set(k, fmt.Sprintf("%v", v))
 		}
 	}
 
-	log.Println(String(params))
 	// 签名
 	var sign string
 	if sign, err = a.sign(params); err != nil {
@@ -94,20 +106,41 @@ func (a *AlipayClient) Execute(_api api, token string) (err error) {
 		log.Println(err.Error())
 		return
 	}
+	respStr := string(body)
+	log.Println("response data======" + respStr)
 
-	//验签之类的..回头再说
+	// 最初的数据..应该是 k v sign
+	r := map[string]interface{}{}
+	if err = json.Unmarshal(body, &r); err != nil {
+		log.Println(err.Error())
+		return
+	}
 
-	log.Println(string(body))
+	var data string
+	//把 method 转换为 key
+	respKey := strings.Replace(_api.getMethod(), ".", "_", -1) + "_response"
+	// 有时候返回这个错误,替换为
+	respStr = strings.Replace(respStr, "error_response", respKey, -1)
+	//原始签名
+	if v, pass := a.verifySign(respStr, fmt.Sprintf("%v", r["sign"]), respKey); !pass {
+		log.Println("verify failed")
+	} else {
+		data = v
+	}
 
 	var newBody []byte
-	if newBody, err = gbkToUtf8(body); err != nil {
+	if newBody, err = gbkToUtf8([]byte(data)); err != nil {
 		log.Println(err.Error())
 		return
 	}
 	log.Println(string(newBody))
 
+	if ptrResp == nil {
+		ptrResp = map[string]interface{}{}
+	}
+
 	// 转义 GBK
-	if err = json.Unmarshal(newBody, _api.response()); err != nil {
+	if err = json.Unmarshal(newBody, ptrResp); err != nil {
 		log.Println(err.Error())
 		return
 	}
@@ -152,6 +185,8 @@ func (a *AlipayClient) sign(params url.Values) (sign string, err error) {
 	}
 	str = strings.TrimRight(str, "&")
 
+	log.Println("signed data====" + str)
+
 	//签名
 	block, _ := pem.Decode(a.PrivateRSA)
 	if block == nil {
@@ -172,5 +207,38 @@ func (a *AlipayClient) sign(params url.Values) (sign string, err error) {
 		return "", err
 	}
 	sign = base64.StdEncoding.EncodeToString(data)
+	return
+}
+
+func (a *AlipayClient) verifySign(s, sign, respKey string) (signData string, pass bool) {
+	idx := strings.Index(s, ",\"sign\"")
+	if idx == -1 {
+		return
+	}
+	signData = s[4+len(respKey) : idx]
+	log.Println("verify signed data====" + signData)
+
+	block, _ := pem.Decode(a.PublicRSA)
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		fmt.Printf("Failed to parse RSA public key: %s\n", err)
+		return
+	}
+	rsaPub, _ := pub.(*rsa.PublicKey)
+	t := sha1.New()
+	_, _ = io.WriteString(t, signData)
+	digest := t.Sum(nil)
+	data, err := base64.StdEncoding.DecodeString(sign)
+	if err != nil {
+		fmt.Println("DecodeString sig error, reason: ", err)
+		return
+	}
+	err = rsa.VerifyPKCS1v15(rsaPub, crypto.SHA1, digest, data)
+	if err != nil {
+		fmt.Println("Verify sig error, reason: ", err)
+		return
+	}
+
+	pass = true
 	return
 }

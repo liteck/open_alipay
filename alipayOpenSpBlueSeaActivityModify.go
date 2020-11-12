@@ -1,35 +1,20 @@
 package open_alipay
 
-import (
-	"log"
-)
-
 /**
 新蓝海活动报名申请单修改
 alipay.open.sp.blueseaactivity.modify
 新蓝海活动报名申请单修改
 */
 type AlipayOpenSpBlueSeaActivityModify struct {
-	base
-	Req  ReqAlipayOpenSpBlueSeaActivityModify
-	Resp *RespAlipayOpenSpBlueSeaActivityModify
+	baseApi
 }
 
-func (a AlipayOpenSpBlueSeaActivityModify) method() string {
+func (a AlipayOpenSpBlueSeaActivityModify) getMethod() string {
 	return "alipay.open.sp.blueseaactivity.modify"
 }
 
-func (a AlipayOpenSpBlueSeaActivityModify) params() (biz interface{}, other interface{}, err error) {
-	if err = valid(&a.Req); err != nil {
-		log.Println(err.Error())
-		return nil, nil, err
-	}
-
-	return a.Req, nil, nil
-}
-
-func (a AlipayOpenSpBlueSeaActivityModify) response() interface{} {
-	return a.Resp
+func (a AlipayOpenSpBlueSeaActivityModify) getReq() (biz interface{}, form interface{}) {
+	return a.Input, nil
 }
 
 type ReqAlipayOpenSpBlueSeaActivityModify struct {
@@ -90,11 +75,8 @@ type ReqAlipayOpenSpBlueSeaActivityModify struct {
 }
 
 type RespAlipayOpenSpBlueSeaActivityModify struct {
-	Sign     string `json:"sign"`
-	Response struct {
-		Code    string `json:"code"`
-		Msg     string `json:"msg"`
-		SubCode string `json:"sub_code"`
-		SubMsg  string `json:"sub_msg"`
-	} `json:"alipay_open_sp_blueseaactivity_modify_response"`
+	Code    string `json:"code"`
+	Msg     string `json:"msg"`
+	SubCode string `json:"sub_code"`
+	SubMsg  string `json:"sub_msg"`
 }

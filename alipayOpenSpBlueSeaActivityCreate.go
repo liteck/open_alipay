@@ -1,46 +1,20 @@
 package open_alipay
 
-import (
-	"errors"
-	"log"
-)
-
 /**
 新蓝海活动报名申请
 alipay.open.sp.blueseaactivity.create
 新蓝海活动报名申请
 */
 type AlipayOpenSpBlueSeaActivityCreate struct {
-	base
-	Req  ReqAlipayOpenSpBlueSeaActivityCreate
-	Resp *RespAlipayOpenSpBlueSeaActivityCreate
+	baseApi
 }
 
-func (a AlipayOpenSpBlueSeaActivityCreate) method() string {
+func (a AlipayOpenSpBlueSeaActivityCreate) getMethod() string {
 	return "alipay.open.sp.blueseaactivity.create"
 }
 
-func (a AlipayOpenSpBlueSeaActivityCreate) params() (biz interface{}, other interface{}, err error) {
-	if err = valid(&a.Req); err != nil {
-		log.Println(err.Error())
-		return nil, nil, err
-	}
-
-	if (a.Req.BizScene == "BLUE_SEA_FOOD_APPLY" || a.Req.BizScene == "BLUE_SEA_FMCG_APPLY") && a.Req.MerchantLogon == "" {
-		err = errors.New("参与直连蓝海活动场景时,商户支付宝账号必填")
-		return
-	}
-
-	if (a.Req.BizScene == "BLUE_SEA_FOOD_INDIRECT_APPLY" || a.Req.BizScene == "BLUE_SEA_FMCG_INDIRECT_APPLY") && a.Req.SubMerchantId == "" {
-		err = errors.New("参与间连蓝海活动场景时,间联商户号必填")
-		return
-	}
-
-	return a.Req, nil, nil
-}
-
-func (a AlipayOpenSpBlueSeaActivityCreate) response() interface{} {
-	return a.Resp
+func (a AlipayOpenSpBlueSeaActivityCreate) getReq() (biz interface{}, form interface{}) {
+	return a.Input, nil
 }
 
 type ReqAlipayOpenSpBlueSeaActivityCreate struct {
@@ -120,13 +94,10 @@ type ReqAlipayOpenSpBlueSeaActivityCreate struct {
 }
 
 type RespAlipayOpenSpBlueSeaActivityCreate struct {
-	Sign     string `json:"sign"`
-	Response struct {
-		Code    string `json:"code"`
-		Msg     string `json:"msg"`
-		SubCode string `json:"sub_code"`
-		SubMsg  string `json:"sub_msg"`
-		//申请单Id
-		OrderId string `json:"order_id"`
-	} `json:"alipay_open_sp_blueseaactivity_create_response"`
+	Code    string `json:"code"`
+	Msg     string `json:"msg"`
+	SubCode string `json:"sub_code"`
+	SubMsg  string `json:"sub_msg"`
+	//申请单Id
+	OrderId string `json:"order_id"`
 }

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/go-playground/locales/zh"
 	ut "github.com/go-playground/universal-translator"
 	"golang.org/x/text/encoding/simplifiedchinese"
@@ -12,18 +11,11 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	zhTranslations "gopkg.in/go-playground/validator.v9/translations/zh"
 	"io/ioutil"
-	"log"
 	"reflect"
-	"sort"
 	"strings"
 )
 
 func valid(ptrInput interface{}) error {
-	if x, err := json.Marshal(ptrInput); err != nil {
-		return err
-	} else {
-		log.Println(string(x))
-	}
 	zhCh := zh.New()
 	validate := validator.New()
 	uni := ut.New(zhCh)
@@ -69,26 +61,6 @@ func utf8ToGbk(s []byte) ([]byte, error) {
 	return d, nil
 }
 
-func mapToString(m map[string]interface{}) (str string) {
-	//对key进行升序排序.
-	keys := make([]string, 0)
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	//对key=value的键值对用&连接起来，略过空值
-	for _, k := range keys {
-		value := fmt.Sprintf("%v", m[k])
-		if value != "" {
-			str = str + k + "=" + value + "&"
-		}
-	}
-
-	str = strings.TrimRight(str, "&")
-	return
-}
-
 func jsonToMap(params interface{}) map[string]interface{} {
 	t := reflect.TypeOf(params)
 	v := reflect.ValueOf(params)
@@ -109,4 +81,9 @@ func jsonToMap(params interface{}) map[string]interface{} {
 		data[key] = value
 	}
 	return data
+}
+
+func String(v interface{}) string {
+	x, _ := json.Marshal(v)
+	return string(x)
 }
