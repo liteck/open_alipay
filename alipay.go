@@ -40,13 +40,19 @@ type baseApi struct {
 支付宝
 */
 type AlipayClient struct {
-	AppId      string `validate:"required"` //开放平台建立的appId
-	UserId     string `validate:"required"` //登录账户的 UserId
-	PublicRSA  []byte `validate:"required"` //支付宝公钥.接口验签使用
-	PrivateRSA []byte `validate:"required"` //支付宝私钥.接口签名使用.(注:非 java 的 pcsk8.)
+	AppId        string `validate:"required"` //开放平台建立的appId
+	UserId       string `validate:"required"` //登录账户的 UserId
+	PublicRSA    []byte `validate:"required"` //支付宝公钥.接口验签使用
+	PrivateRSA   []byte `validate:"required"` //支付宝私钥.接口签名使用.(注:非 java 的 pcsk8.)
+	appAuthToken string
 }
 
-func (a *AlipayClient) Execute(_api api, token string, ptrResp interface{}) (err error) {
+func (a *AlipayClient) WithToken(token string) *AlipayClient {
+	a.appAuthToken = token
+	return a
+}
+
+func (a *AlipayClient) Execute(_api api, ptrResp interface{}) (err error) {
 	// check
 	if err = valid(a); err != nil {
 		log.Println(err.Error())
@@ -54,7 +60,7 @@ func (a *AlipayClient) Execute(_api api, token string, ptrResp interface{}) (err
 	}
 
 	//公共参数
-	params := a.initParams(_api.getMethod(), token)
+	params := a.initParams(_api.getMethod())
 
 	//业务参数
 	bizContent, formParams := _api.getReq()
@@ -152,7 +158,7 @@ func (a *AlipayClient) Execute(_api api, token string, ptrResp interface{}) (err
 初始化
 支付宝公共参数
 */
-func (a *AlipayClient) initParams(method, token string) url.Values {
+func (a *AlipayClient) initParams(method string) url.Values {
 	p := url.Values{}
 
 	p.Set("app_id", a.AppId)
@@ -162,7 +168,7 @@ func (a *AlipayClient) initParams(method, token string) url.Values {
 	p.Set("sign_type", "RSA")
 	p.Set("timestamp", time.Now().Format("2006-01-02 15:04:05"))
 	p.Set("version", "1.0")
-	p.Set("app_auth_token", token)
+	p.Set("app_auth_token", a.appAuthToken)
 
 	return p
 }
