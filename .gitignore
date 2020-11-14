@@ -14,4 +14,4 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 .idea
-alipayOpenSpImageUpload_test.go
+alipayOpenSpImageUploadCopy_test.go
