@@ -6,15 +6,19 @@ alipay.open.sp.image.upload
 图片上传接口
 */
 type AlipayOpenSpImageUpload struct {
-	baseApi
+	api
 }
 
 func (a AlipayOpenSpImageUpload) getMethod() string {
 	return "alipay.open.sp.image.upload"
 }
 
-func (a AlipayOpenSpImageUpload) getReq() (biz interface{}, form interface{}) {
-	return nil, a.Input
+func (a AlipayOpenSpImageUpload) getAppAuthToken() string {
+	return a.appAuthToken
+}
+
+func (a AlipayOpenSpImageUpload) getReq() interface{} {
+	return a.input
 }
 
 type ReqAlipayOpenSpImageUpload struct {
@@ -23,7 +27,8 @@ type ReqAlipayOpenSpImageUpload struct {
 	图片二进制字节流，最大为10M
 	二进制字节流
 	*/
-	ImageContent []byte `json:"image_content,omitempty"`
+	// 二进制流的参数不在这里申明,方法中带入
+	//ImageContent []byte `json:"image_content,omitempty"`
 }
 
 type RespAlipayOpenSpImageUpload struct {

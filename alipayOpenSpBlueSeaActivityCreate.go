@@ -6,15 +6,19 @@ alipay.open.sp.blueseaactivity.create
 新蓝海活动报名申请
 */
 type AlipayOpenSpBlueSeaActivityCreate struct {
-	baseApi
+	api
 }
 
 func (a AlipayOpenSpBlueSeaActivityCreate) getMethod() string {
 	return "alipay.open.sp.blueseaactivity.create"
 }
 
-func (a AlipayOpenSpBlueSeaActivityCreate) getReq() (biz interface{}, form interface{}) {
-	return a.Input, nil
+func (a AlipayOpenSpBlueSeaActivityCreate) getAppAuthToken() string {
+	return a.appAuthToken
+}
+
+func (a AlipayOpenSpBlueSeaActivityCreate) getReq()  interface{} {
+	return a.input
 }
 
 type ReqAlipayOpenSpBlueSeaActivityCreate struct {
