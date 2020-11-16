@@ -88,12 +88,16 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 	bizContent := _api.getReq()
 	// biz类参数可不是这样的
 	if bizContent != nil {
-		var bizData []byte
+		var bizData,bizData2 []byte
 		if bizData, err = json.Marshal(&bizContent); err != nil {
 			log.Println(err.Error())
 			return
 		}
-		params.Set("biz_content", string(bizData))
+		if bizData2, err = utf8ToGbk(bizData); err != nil {
+			log.Println(err.Error())
+			return
+		}
+		params.Set("biz_content", string(bizData2))
 	}
 
 	// 签名
@@ -299,6 +303,5 @@ func (a *AlipayClient) request(params url.Values) (data []byte, err error) {
 	}()
 
 	data, err = ioutil.ReadAll(res.Body)
-	log.Println(string(data))
 	return
 }
