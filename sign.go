@@ -35,7 +35,12 @@ func doSign(params url.Values, privateKey []byte) (sign string, err error) {
 	}
 	str = strings.TrimRight(str, "&")
 
-	log.Println("signed data====" + str)
+	var __data []byte
+	if __data,err = utf8ToGbk([]byte(str));err!=nil{
+		return
+	}
+
+	log.Println("signed data====" + string(__data))
 
 	//签名
 	block, _ := pem.Decode(privateKey)
@@ -50,7 +55,7 @@ func doSign(params url.Values, privateKey []byte) (sign string, err error) {
 	}
 
 	_t := crypto.SHA1.New()
-	_t.Write([]byte(str))
+	_t.Write(__data)
 	digest := _t.Sum(nil)
 	var data []byte
 	if data, err = rsa.SignPKCS1v15(rand.Reader, private, crypto.SHA1, digest); err != nil {
