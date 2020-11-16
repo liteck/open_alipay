@@ -11,8 +11,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -88,7 +86,7 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 	bizContent := _api.getReq()
 	// biz类参数可不是这样的
 	if bizContent != nil {
-		var bizData,bizData2 []byte
+		var bizData, bizData2 []byte
 		if bizData, err = json.Marshal(&bizContent); err != nil {
 			log.Println(err.Error())
 			return
@@ -160,7 +158,7 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 /**
 用于图片上传
 */
-func (a *AlipayClient) ExecuteImageUpload(_api apiI, filePath string, ptrResp interface{}) (err error) {
+func (a *AlipayClient) ExecuteImageUpload(_api apiI, fileData []byte, fileName string, ptrResp interface{}) (err error) {
 	// check
 	if err = valid(a); err != nil {
 		log.Println(err.Error())
@@ -180,7 +178,7 @@ func (a *AlipayClient) ExecuteImageUpload(_api apiI, filePath string, ptrResp in
 	}
 
 	var body []byte
-	if body, err = a.requestMultiPart(params, filePath); err != nil {
+	if body, err = a.requestMultiPart(params, fileData, fileName); err != nil {
 		log.Println(err.Error())
 		return
 	}
@@ -227,22 +225,14 @@ func (a *AlipayClient) ExecuteImageUpload(_api apiI, filePath string, ptrResp in
 	return
 }
 
-func (a *AlipayClient) requestMultiPart(params url.Values, filePath string) (data []byte, err error) {
-	var file *os.File
-	if file, err = os.Open(filePath); err != nil {
-		log.Println(err.Error())
-		return
-	}
-	defer func() {
-		_ = file.Close()
-	}()
+func (a *AlipayClient) requestMultiPart(params url.Values, fileData []byte, fileName string) (data []byte, err error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	var formFile io.Writer
-	if formFile, err = writer.CreateFormFile("image_content", filepath.Base(filePath)); err != nil {
+	if formFile, err = writer.CreateFormFile("image_content", fileName); err != nil {
 		log.Println(err.Error())
 		return
-	} else if _, err = io.Copy(formFile, file); err != nil {
+	} else if _, err = formFile.Write(fileData); err != nil {
 		log.Println(err.Error())
 		return
 	}
