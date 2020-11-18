@@ -46,6 +46,7 @@ type AlipayClient struct {
 	UserId     string `validate:"required"` //登录账户的 UserId
 	PublicRSA  []byte `validate:"required"` //支付宝公钥.接口验签使用
 	PrivateRSA []byte `validate:"required"` //支付宝私钥.接口签名使用.(注:非 java 的 pcsk8.)
+	timeout    int                          // 超时时间: 3
 }
 
 /**
@@ -67,6 +68,11 @@ func (a *AlipayClient) initParams(method, token string) url.Values {
 	}
 
 	return p
+}
+
+func (a *AlipayClient) Timeout(second int) *AlipayClient {
+	a.timeout = second
+	return a
 }
 
 /**
@@ -247,7 +253,7 @@ func (a *AlipayClient) requestMultiPart(params url.Values, fileData []byte, file
 	}
 
 	client := &http.Client{}
-	client.Timeout = time.Duration(3) * time.Second
+	client.Timeout = time.Duration(a.timeout) * time.Second
 
 	var req *http.Request
 	if req, err = http.NewRequest("POST", "https://openapi.alipay.com/gateway.do", body); err != nil {
