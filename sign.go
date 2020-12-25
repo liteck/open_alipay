@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/url"
 	"sort"
 	"strings"

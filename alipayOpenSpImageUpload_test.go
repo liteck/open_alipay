@@ -1,7 +1,6 @@
 package open_alipay
 
 import (
-	"log"
 	"testing"
 )
 
