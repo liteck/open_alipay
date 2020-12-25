@@ -34,7 +34,7 @@ func doSign(params url.Values, privateKey []byte) (sign string, err error) {
 		}
 	}
 	str = strings.TrimRight(str, "&")
-	log.Println(str)
+	Trace.Println(str)
 
 	//签名
 	block, _ := pem.Decode(privateKey)
@@ -65,7 +65,7 @@ func doVerifySign(s, sign, respKey string, publicKey []byte) (signData string, p
 		return
 	}
 	signData = s[4+len(respKey) : idx]
-	log.Println("verify signed data====" + signData)
+	Trace.Println("verify signed data====" + signData)
 
 	block, _ := pem.Decode(publicKey)
 	pub, err := x509.ParsePKIXPublicKey(block.Bytes)

@@ -81,7 +81,7 @@ func (a *AlipayClient) Timeout(second int) *AlipayClient {
 func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 	// check
 	if err = valid(a); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -94,11 +94,11 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 	if bizContent != nil {
 		var bizData, bizData2 []byte
 		if bizData, err = json.Marshal(&bizContent); err != nil {
-			log.Println(err.Error())
+			Trace.Println(err.Error())
 			return
 		}
 		if bizData2, err = utf8ToGbk(bizData); err != nil {
-			log.Println(err.Error())
+			Trace.Println(err.Error())
 			return
 		}
 		params.Set("biz_content", string(bizData2))
@@ -107,7 +107,7 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 	// 签名
 	var sign string
 	if sign, err = doSign(params, a.PrivateRSA); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	} else {
 		params.Set("sign", sign)
@@ -115,17 +115,17 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 
 	var body []byte
 	if body, err = a.request(params); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
 	respStr := string(body)
-	log.Println("response data======" + respStr)
+	Trace.Println("response data======" + respStr)
 
 	// 最初的数据..应该是 k v sign
 	r := map[string]interface{}{}
 	if err = json.Unmarshal(body, &r); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -136,17 +136,17 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 	respStr = strings.Replace(respStr, "error_response", respKey, -1)
 	//原始签名
 	if v, pass := doVerifySign(respStr, fmt.Sprintf("%v", r["sign"]), respKey, a.PublicRSA); !pass {
-		log.Println("verify failed")
+		Trace.Println("verify failed")
 	} else {
 		data = v
 	}
 
 	var newBody []byte
 	if newBody, err = gbkToUtf8([]byte(data)); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
-	log.Println(string(newBody))
+	Trace.Println(string(newBody))
 
 	if ptrResp == nil {
 		ptrResp = map[string]interface{}{}
@@ -154,7 +154,7 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 
 	// 转义 GBK
 	if err = json.Unmarshal(newBody, ptrResp); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -167,7 +167,7 @@ func (a *AlipayClient) Execute(_api apiI, ptrResp interface{}) (err error) {
 func (a *AlipayClient) ExecuteImageUpload(_api apiI, fileData []byte, fileName string, ptrResp interface{}) (err error) {
 	// check
 	if err = valid(a); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -177,7 +177,7 @@ func (a *AlipayClient) ExecuteImageUpload(_api apiI, fileData []byte, fileName s
 	// 签名
 	var sign string
 	if sign, err = doSign(params, a.PrivateRSA); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	} else {
 		params.Set("sign", sign)
@@ -185,17 +185,17 @@ func (a *AlipayClient) ExecuteImageUpload(_api apiI, fileData []byte, fileName s
 
 	var body []byte
 	if body, err = a.requestMultiPart(params, fileData, fileName); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
 	respStr := string(body)
-	log.Println("response data======" + respStr)
+	Trace.Println("response data======" + respStr)
 
 	// 最初的数据..应该是 k v sign
 	r := map[string]interface{}{}
 	if err = json.Unmarshal(body, &r); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -206,17 +206,17 @@ func (a *AlipayClient) ExecuteImageUpload(_api apiI, fileData []byte, fileName s
 	respStr = strings.Replace(respStr, "error_response", respKey, -1)
 	//原始签名
 	if v, pass := doVerifySign(respStr, fmt.Sprintf("%v", r["sign"]), respKey, a.PublicRSA); !pass {
-		log.Println("verify failed")
+		Trace.Println("verify failed")
 	} else {
 		data = v
 	}
 
 	var newBody []byte
 	if newBody, err = gbkToUtf8([]byte(data)); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
-	log.Println(string(newBody))
+	Trace.Println(string(newBody))
 
 	if ptrResp == nil {
 		ptrResp = map[string]interface{}{}
@@ -224,7 +224,7 @@ func (a *AlipayClient) ExecuteImageUpload(_api apiI, fileData []byte, fileName s
 
 	// 转义 GBK
 	if err = json.Unmarshal(newBody, ptrResp); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -236,10 +236,10 @@ func (a *AlipayClient) requestMultiPart(params url.Values, fileData []byte, file
 	writer := multipart.NewWriter(body)
 	var formFile io.Writer
 	if formFile, err = writer.CreateFormFile("image_content", fileName); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	} else if _, err = formFile.Write(fileData); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -248,7 +248,7 @@ func (a *AlipayClient) requestMultiPart(params url.Values, fileData []byte, file
 	}
 
 	if err = writer.Close(); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -257,19 +257,19 @@ func (a *AlipayClient) requestMultiPart(params url.Values, fileData []byte, file
 
 	var req *http.Request
 	if req, err = http.NewRequest("POST", "https://openapi.alipay.com/gateway.do", body); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 
 	var resp *http.Response
 	if resp, err = client.Do(req); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 	if resp.Body == nil {
 		err = errors.New("response body is nil")
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
@@ -285,12 +285,12 @@ func (a *AlipayClient) request(params url.Values) (data []byte, err error) {
 	// 请求
 	var res *http.Response
 	if res, err = http.PostForm("https://openapi.alipay.com/gateway.do", params); err != nil {
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 	if res.Body == nil {
 		err = errors.New("response body is null")
-		log.Println(err.Error())
+		Trace.Println(err.Error())
 		return
 	}
 
