@@ -59,6 +59,7 @@ type RespAlipayOpenSpBlueSeaActivityQuery struct {
 	PASS:报名成
 	*/
 	Status string `json:"status"`
+	Memo   string `json:"memo"`
 	/**
 	营业执照，要求证件文本信息清晰可见。 请上传照片fileId（传参明细参见应用场景说明）
 	*/
